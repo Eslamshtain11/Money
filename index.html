@@ -1,0 +1,911 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حسابات مستر إسلام</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- SheetJS (xlsx) for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- jsPDF and html2canvas for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Google Fonts: Tajawal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0a192f;
+            --bg-light: #112240;
+            --gold-accent: #D4AF37;
+            --text-light: #ccd6f6;
+            --text-white: #e6f1ff;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+        }
+        .sidebar-icon {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+        .active-link {
+            background-color: var(--gold-accent);
+            color: var(--bg-dark) !important;
+            border-right: 4px solid var(--text-white);
+        }
+        .active-link svg {
+            stroke: var(--bg-dark);
+        }
+        .form-input, .form-select {
+            background-color: var(--bg-light);
+            border: 1px solid var(--gold-accent);
+            color: var(--text-white);
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--gold-accent);
+        }
+        .btn-gold {
+            background-color: var(--gold-accent);
+            color: var(--bg-dark);
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(212, 175, 55, 0.3);
+        }
+        .card {
+            background-color: var(--bg-light);
+            border-radius: 12px;
+            border: 1px solid #233554;
+            box-shadow: 0 10px 30px -15px rgba(2,12,27,0.7);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-accent);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b89b31;
+        }
+        /* Hide spinner from number inputs */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex h-screen bg-gray-900">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed top-0 right-0 h-full w-64 bg-[var(--bg-light)] text-[var(--text-light)] p-4 transition-transform transform translate-x-0 z-30 md:relative md:translate-x-0">
+            <div class="flex items-center justify-between mb-10">
+                <h1 class="text-2xl font-bold text-[var(--gold-accent)]">حسابات مستر إسلام</h1>
+                <button id="close-sidebar-btn" class="md:hidden text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#dashboard" class="nav-link flex items-center p-3 my-2 rounded-lg hover:bg-[var(--gold-accent)] hover:text-[var(--bg-dark)] transition-colors duration-200">
+                        <svg class="sidebar-icon ml-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        الرئيسية
+                    </a></li>
+                    <li><a href="#add-payment" class="nav-link flex items-center p-3 my-2 rounded-lg hover:bg-[var(--gold-accent)] hover:text-[var(--bg-dark)] transition-colors duration-200">
+                        <svg class="sidebar-icon ml-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        إضافة دفعة
+                    </a></li>
+                    <li><a href="#monthly-report" class="nav-link flex items-center p-3 my-2 rounded-lg hover:bg-[var(--gold-accent)] hover:text-[var(--bg-dark)] transition-colors duration-200">
+                        <svg class="sidebar-icon ml-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 17l10.5-10.5a2.828 2.828 0 114 4L7 21H2v-5z"></path><path d="M21 21l-5-5"></path></svg>
+                        كشف الشهر
+                    </a></li>
+                    <li><a href="#statistics" class="nav-link flex items-center p-3 my-2 rounded-lg hover:bg-[var(--gold-accent)] hover:text-[var(--bg-dark)] transition-colors duration-200">
+                        <svg class="sidebar-icon ml-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20V16"></path></svg>
+                        إحصائيات
+                    </a></li>
+                    <li><a href="#advanced-search" class="nav-link flex items-center p-3 my-2 rounded-lg hover:bg-[var(--gold-accent)] hover:text-[var(--bg-dark)] transition-colors duration-200">
+                        <svg class="sidebar-icon ml-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        بحث متقدم
+                    </a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <button id="open-sidebar-btn" class="md:hidden p-2 mb-4 rounded-md bg-[var(--bg-light)] text-white">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <!-- Views Container -->
+            <div id="views-container">
+                <!-- Dashboard View -->
+                <div id="dashboard" class="view">
+                   <h2 class="text-3xl font-bold text-white mb-6">لوحة التحكم الرئيسية</h2>
+                   <div id="loader" class="text-center p-10"><div class="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--gold-accent)] mx-auto"></div><p class="mt-4">جاري تحميل البيانات...</p></div>
+                   <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 hidden">
+                        <div class="card p-6">
+                            <h3 class="text-lg font-bold text-[var(--gold-accent)]">إجمالي الدخل (الشهر الحالي)</h3>
+                            <p id="total-this-month" class="text-3xl font-bold text-white mt-2">0 جنيه</p>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-lg font-bold text-[var(--gold-accent)]">إجمالي عدد الدفعات</h3>
+                            <p id="total-payments-count" class="text-3xl font-bold text-white mt-2">0</p>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-lg font-bold text-[var(--gold-accent)]">أعلى شهر في الدخل</h3>
+                            <p id="highest-month" class="text-2xl font-bold text-white mt-2">-</p>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-lg font-bold text-[var(--gold-accent)]">أقل شهر في الدخل</h3>
+                            <p id="lowest-month" class="text-2xl font-bold text-white mt-2">-</p>
+                        </div>
+                   </div>
+                   <div id="welcome-message" class="card mt-8 p-6 hidden">
+                       <h3 class="text-xl font-bold text-[var(--gold-accent)]">أهلاً بك يا مستر إسلام!</h3>
+                       <p class="mt-2">يبدو أنه لا توجد بيانات مسجلة بعد. ابدأ بإضافة أول دفعة لك من قائمة "إضافة دفعة".</p>
+                   </div>
+                </div>
+
+                <!-- Add Payment View -->
+                <div id="add-payment" class="view hidden">
+                    <h2 class="text-3xl font-bold text-white mb-6">إضافة دفعة جديدة</h2>
+                    <div class="card p-8 max-w-lg mx-auto">
+                        <form id="add-payment-form">
+                            <div class="mb-4">
+                                <label for="student-name" class="block mb-2 font-medium">اسم الطالب</label>
+                                <input type="text" id="student-name" class="form-input" placeholder="مثال: محمد أحمد" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="group-name" class="block mb-2 font-medium">المجموعة</label>
+                                <input type="text" id="group-name" class="form-input" placeholder="مثال: مجموعة الساعة 5" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="amount" class="block mb-2 font-medium">الفلوس اللي اتدفعت (بالجنيه)</label>
+                                <input type="number" id="amount" class="form-input" placeholder="مثال: 250" required min="0">
+                            </div>
+                            <div class="mb-6">
+                                <label for="payment-date" class="block mb-2 font-medium">تاريخ الدفع</label>
+                                <input type="date" id="payment-date" class="form-input" required>
+                            </div>
+                            <button type="submit" class="btn-gold w-full">حفظ الدفعة</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Monthly Report View -->
+                <div id="monthly-report" class="view hidden">
+                    <h2 class="text-3xl font-bold text-white mb-6">كشف حساب الشهر الحالي</h2>
+                    <div class="card p-6">
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                            <input type="text" id="search-monthly" class="form-input md:w-1/3" placeholder="ابحث باسم طالب أو مجموعة...">
+                             <div class="flex items-center gap-4">
+                                <button id="export-excel-monthly" class="btn-gold">تصدير Excel</button>
+                                <button id="export-pdf-monthly" class="btn-gold">طباعة تقرير PDF</button>
+                             </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right">
+                                <thead class="border-b-2 border-[var(--gold-accent)]">
+                                    <tr>
+                                        <th class="p-3 text-white">اسم الطالب</th>
+                                        <th class="p-3 text-white">المجموعة</th>
+                                        <th class="p-3 text-white">المبلغ</th>
+                                        <th class="p-3 text-white">التاريخ</th>
+                                        <th class="p-3 text-white">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="monthly-report-table-body">
+                                    <!-- Rows will be injected here -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="border-t-2 border-[var(--gold-accent)] font-bold">
+                                        <td class="p-4 text-white text-lg" colspan="2">الإجمالي</td>
+                                        <td id="monthly-total" class="p-4 text-[var(--gold-accent)] text-lg" colspan="3">0 جنيه</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                             <div id="no-monthly-data" class="text-center py-10 hidden"><p>لا توجد دفعات مسجلة هذا الشهر.</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics View -->
+                <div id="statistics" class="view hidden">
+                    <h2 class="text-3xl font-bold text-white mb-6">الإحصائيات والرسومات البيانية</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold text-[var(--gold-accent)] mb-4">إجمالي الدخل الشهري</h3>
+                            <canvas id="monthly-income-chart"></canvas>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold text-[var(--gold-accent)] mb-4">توزيع الدخل على المجموعات</h3>
+                            <canvas id="group-distribution-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                 <!-- Advanced Search View -->
+                <div id="advanced-search" class="view hidden">
+                    <h2 class="text-3xl font-bold text-white mb-6">بحث متقدم عن طالب</h2>
+                    <div class="card p-6">
+                        <div class="mb-4">
+                             <input type="text" id="advanced-search-input" class="form-input" placeholder="اكتب اسم الطالب للبحث عن تاريخ دفعه بالكامل...">
+                        </div>
+                        <div class="overflow-x-auto mt-6">
+                            <table class="w-full text-right">
+                                <thead class="border-b-2 border-[var(--gold-accent)]">
+                                    <tr>
+                                        <th class="p-3 text-white">المجموعة</th>
+                                        <th class="p-3 text-white">المبلغ</th>
+                                        <th class="p-3 text-white">التاريخ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="advanced-search-results">
+                                    <!-- Search results here -->
+                                </tbody>
+                            </table>
+                            <div id="advanced-search-placeholder" class="text-center py-10">
+                                <p>نتائج البحث ستظهر هنا.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="card p-8 max-w-lg w-full mx-4">
+            <h2 class="text-2xl font-bold text-white mb-6">تعديل بيانات الدفعة</h2>
+            <form id="edit-payment-form">
+                <input type="hidden" id="edit-doc-id">
+                <div class="mb-4">
+                    <label for="edit-student-name" class="block mb-2">اسم الطالب</label>
+                    <input type="text" id="edit-student-name" class="form-input" required>
+                </div>
+                <div class="mb-4">
+                    <label for="edit-group-name" class="block mb-2">المجموعة</label>
+                    <input type="text" id="edit-group-name" class="form-input" required>
+                </div>
+                <div class="mb-4">
+                    <label for="edit-amount" class="block mb-2">الفلوس اللي اتدفعت</label>
+                    <input type="number" id="edit-amount" class="form-input" required min="0">
+                </div>
+                <div class="mb-6">
+                    <label for="edit-payment-date" class="block mb-2">تاريخ الدفع</label>
+                    <input type="date" id="edit-payment-date" class="form-input" required>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" id="cancel-edit" class="bg-gray-600 text-white px-4 py-2 rounded-lg">إلغاء</button>
+                    <button type="submit" class="btn-gold">حفظ التعديلات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Custom Notification -->
+    <div id="notification" class="fixed bottom-5 left-5 bg-green-500 text-white py-3 px-6 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 z-50">
+        <p>تم الحفظ بنجاح!</p>
+    </div>
+
+    <!-- PDF Report Template (Hidden) -->
+    <div id="pdf-report-template" class="hidden absolute -left-full">
+        <div dir="rtl" class="p-10 bg-white text-black font-[Tajawal]" style="width: 210mm; min-height: 297mm;">
+            <div class="text-center mb-10 border-b-2 pb-5 border-gray-400">
+                <h1 class="text-4xl font-bold text-[#0a192f]">تقرير المرتب الشهري</h1>
+                <h2 class="text-2xl text-gray-700">مستر إسلام</h2>
+            </div>
+            <div class="mb-8">
+                <p class="text-lg"><span class="font-bold">الشهر:</span> <span id="pdf-month-name"></span></p>
+                <p class="text-lg"><span class="font-bold">إجمالي الدخل:</span> <span id="pdf-month-total" class="font-bold text-green-700"></span></p>
+                <p class="text-lg"><span class="font-bold">تاريخ التقرير:</span> <span id="pdf-report-date"></span></p>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-[#0a192f]">ملخص الدخل:</h3>
+            <div class="w-full h-80 border border-gray-300 p-4 rounded-lg shadow-md mb-8">
+                <img id="pdf-chart-image" src="" class="w-full h-full object-contain" />
+            </div>
+             <h3 class="text-2xl font-bold mb-4 text-[#0a192f]">كشف الدفعات التفصيلي:</h3>
+             <table class="w-full text-right border-collapse border border-gray-400">
+                 <thead>
+                    <tr class="bg-gray-200">
+                        <th class="p-2 border border-gray-400">اسم الطالب</th>
+                        <th class="p-2 border border-gray-400">المجموعة</th>
+                        <th class="p-2 border border-gray-400">المبلغ</th>
+                        <th class="p-2 border border-gray-400">التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-table-body">
+                </tbody>
+             </table>
+        </div>
+    </div>
+
+
+<script type="module">
+    // Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // --- CONFIG & INITIALIZATION ---
+    
+    // Use environment variables provided by the platform
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    // For debugging
+    // setLogLevel('debug');
+    
+    let userId = null;
+    let paymentsCollectionRef;
+    let allPayments = [];
+    let monthlyIncomeChart = null;
+    let groupDistributionChart = null;
+    
+    const loader = document.getElementById('loader');
+    const dashboardContent = document.getElementById('dashboard-content');
+    const welcomeMessage = document.getElementById('welcome-message');
+
+    // --- AUTHENTICATION ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("User is signed in with UID:", user.uid);
+            userId = user.uid;
+            // Path for user's private data
+            paymentsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/payments`);
+            loadDataAndSetupListeners();
+        } else {
+            console.log("User is signed out. Attempting to sign in.");
+            signInUser();
+        }
+    });
+
+    async function signInUser() {
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                console.log("Signing in with custom token...");
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                console.log("Signing in anonymously...");
+                await signInAnonymously(auth);
+            }
+        } catch (error) {
+            console.error("Authentication Error:", error);
+            showNotification(`حدث خطأ في المصادقة: ${error.message}`, 'error');
+        }
+    }
+    
+    // --- DATA HANDLING ---
+    function loadDataAndSetupListeners() {
+        if (!paymentsCollectionRef) return;
+        
+        onSnapshot(paymentsCollectionRef, (snapshot) => {
+            allPayments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            allPayments.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by most recent
+            
+            loader.classList.add('hidden');
+
+            if (allPayments.length === 0) {
+                welcomeMessage.classList.remove('hidden');
+                dashboardContent.classList.add('hidden');
+            } else {
+                welcomeMessage.classList.add('hidden');
+                dashboardContent.classList.remove('hidden');
+            }
+
+            updateUI();
+        }, (error) => {
+            console.error("Error fetching data:", error);
+            showNotification('حدث خطأ أثناء تحميل البيانات.', 'error');
+            loader.classList.add('hidden');
+        });
+    }
+
+    function updateUI() {
+        renderCurrentView();
+        updateDashboardCards();
+    }
+    
+    function renderCurrentView() {
+        const currentHash = window.location.hash || '#dashboard';
+        const viewId = currentHash.substring(1);
+        
+        switch(viewId) {
+            case 'monthly-report':
+                renderMonthlyReport();
+                break;
+            case 'statistics':
+                renderStatistics();
+                break;
+            case 'advanced-search':
+                renderAdvancedSearch();
+                break;
+            default: // dashboard
+                // This is handled by updateDashboardCards
+                break;
+        }
+    }
+
+    // --- UI & NAVIGATION ---
+    const views = document.querySelectorAll('.view');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    function navigate(hash) {
+        views.forEach(view => view.classList.add('hidden'));
+        navLinks.forEach(link => link.classList.remove('active-link'));
+
+        const targetView = document.querySelector(hash);
+        const activeLink = document.querySelector(`.nav-link[href="${hash}"]`);
+
+        if (targetView) targetView.classList.remove('hidden');
+        if (activeLink) activeLink.classList.add('active-link');
+        
+        renderCurrentView();
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const hash = e.currentTarget.getAttribute('href');
+            window.location.hash = hash;
+            // Close sidebar on mobile after navigation
+            if(window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('translate-x-full', 'md:translate-x-0');
+            }
+        });
+    });
+    
+    window.addEventListener('hashchange', () => navigate(window.location.hash));
+    
+    // Initial page load
+    navigate(window.location.hash || '#dashboard');
+    
+    // Mobile sidebar toggle
+    document.getElementById('open-sidebar-btn').addEventListener('click', () => {
+         document.getElementById('sidebar').classList.remove('translate-x-full', 'md:translate-x-0');
+    });
+     document.getElementById('close-sidebar-btn').addEventListener('click', () => {
+         document.getElementById('sidebar').classList.add('translate-x-full', 'md:translate-x-0');
+    });
+
+    // Set today's date in forms
+    document.getElementById('payment-date').valueAsDate = new Date();
+
+    // --- CRUD OPERATIONS ---
+    const addPaymentForm = document.getElementById('add-payment-form');
+    addPaymentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const studentName = document.getElementById('student-name').value.trim();
+        const groupName = document.getElementById('group-name').value.trim();
+        const amount = parseFloat(document.getElementById('amount').value);
+        const date = document.getElementById('payment-date').value;
+
+        if (!studentName || !groupName || isNaN(amount) || amount <= 0 || !date) {
+            showNotification('من فضلك املأ كل الخانات ببيانات صحيحة.', 'error');
+            return;
+        }
+
+        try {
+            await addDoc(paymentsCollectionRef, { studentName, groupName, amount, date });
+            showNotification('تم إضافة الدفعة بنجاح!', 'success');
+            addPaymentForm.reset();
+            document.getElementById('payment-date').valueAsDate = new Date();
+            window.location.hash = '#monthly-report';
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            showNotification('حدث خطأ أثناء الحفظ.', 'error');
+        }
+    });
+    
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-payment-form');
+    
+    window.openEditModal = (id, name, group, amount, date) => {
+        document.getElementById('edit-doc-id').value = id;
+        document.getElementById('edit-student-name').value = name;
+        document.getElementById('edit-group-name').value = group;
+        document.getElementById('edit-amount').value = amount;
+        document.getElementById('edit-payment-date').value = date;
+        editModal.classList.remove('hidden');
+    };
+
+    document.getElementById('cancel-edit').addEventListener('click', () => {
+        editModal.classList.add('hidden');
+    });
+    
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('edit-doc-id').value;
+        const studentName = document.getElementById('edit-student-name').value.trim();
+        const groupName = document.getElementById('edit-group-name').value.trim();
+        const amount = parseFloat(document.getElementById('edit-amount').value);
+        const date = document.getElementById('edit-payment-date').value;
+        
+        if (!studentName || !groupName || isNaN(amount) || amount <= 0 || !date) {
+            showNotification('من فضلك املأ كل الخانات ببيانات صحيحة.', 'error');
+            return;
+        }
+        
+        try {
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/payments`, id);
+            await updateDoc(docRef, { studentName, groupName, amount, date });
+            showNotification('تم تعديل البيانات بنجاح!', 'success');
+            editModal.classList.add('hidden');
+        } catch (error) {
+            console.error("Error updating document: ", error);
+            showNotification('حدث خطأ أثناء التعديل.', 'error');
+        }
+    });
+    
+    window.deletePayment = async (id) => {
+        // A custom confirmation would be better, but this is a placeholder.
+        // Using a simple confirm for now, though it's discouraged.
+        // A better approach would be a custom modal.
+        if (confirm('هل أنت متأكد أنك تريد حذف هذه الدفعة؟')) {
+             try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/payments`, id);
+                await deleteDoc(docRef);
+                showNotification('تم الحذف بنجاح.', 'success');
+            } catch (error) {
+                console.error("Error deleting document: ", error);
+                showNotification('حدث خطأ أثناء الحذف.', 'error');
+            }
+        }
+    };
+
+    // --- VIEWS RENDERING ---
+
+    function updateDashboardCards() {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        const monthlyPayments = allPayments.filter(p => {
+            const paymentDate = new Date(p.date);
+            return paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear;
+        });
+
+        const totalThisMonth = monthlyPayments.reduce((sum, p) => sum + p.amount, 0);
+        document.getElementById('total-this-month').textContent = `${totalThisMonth.toLocaleString()} جنيه`;
+
+        document.getElementById('total-payments-count').textContent = allPayments.length;
+        
+        const monthlyTotals = {};
+        allPayments.forEach(p => {
+            const monthYear = new Date(p.date).toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' });
+            monthlyTotals[monthYear] = (monthlyTotals[monthYear] || 0) + p.amount;
+        });
+
+        const totalsArray = Object.entries(monthlyTotals);
+        if (totalsArray.length > 0) {
+            const highest = totalsArray.reduce((max, month) => month[1] > max[1] ? month : max);
+            const lowest = totalsArray.reduce((min, month) => month[1] < min[1] ? month : min);
+            document.getElementById('highest-month').textContent = `${highest[0]} (${highest[1].toLocaleString()} ج)`;
+            document.getElementById('lowest-month').textContent = `${lowest[0]} (${lowest[1].toLocaleString()} ج)`;
+        } else {
+             document.getElementById('highest-month').textContent = '-';
+             document.getElementById('lowest-month').textContent = '-';
+        }
+    }
+    
+    function renderMonthlyReport() {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const tableBody = document.getElementById('monthly-report-table-body');
+        const monthlyTotalEl = document.getElementById('monthly-total');
+        const noDataEl = document.getElementById('no-monthly-data');
+        const searchInput = document.getElementById('search-monthly').value.toLowerCase();
+
+        const monthlyPayments = allPayments.filter(p => {
+            const paymentDate = new Date(p.date);
+            const matchesDate = paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear;
+            const matchesSearch = p.studentName.toLowerCase().includes(searchInput) || p.groupName.toLowerCase().includes(searchInput);
+            return matchesDate && matchesSearch;
+        });
+
+        if (monthlyPayments.length === 0) {
+            tableBody.innerHTML = '';
+            monthlyTotalEl.textContent = '0 جنيه';
+            noDataEl.classList.remove('hidden');
+            return;
+        }
+
+        noDataEl.classList.add('hidden');
+        tableBody.innerHTML = monthlyPayments.map(p => `
+            <tr class="border-b border-gray-700 hover:bg-[var(--bg-dark)]">
+                <td class="p-3">${p.studentName}</td>
+                <td class="p-3">${p.groupName}</td>
+                <td class="p-3 text-[var(--gold-accent)] font-semibold">${p.amount.toLocaleString()} جنيه</td>
+                <td class="p-3">${new Date(p.date).toLocaleDateString('ar-EG')}</td>
+                <td class="p-3">
+                    <button onclick="openEditModal('${p.id}', '${p.studentName}', '${p.groupName}', ${p.amount}, '${p.date}')" class="text-blue-400 hover:text-blue-300 mr-2">تعديل</button>
+                    <button onclick="deletePayment('${p.id}')" class="text-red-400 hover:text-red-300">حذف</button>
+                </td>
+            </tr>
+        `).join('');
+
+        const total = monthlyPayments.reduce((sum, p) => sum + p.amount, 0);
+        monthlyTotalEl.textContent = `${total.toLocaleString()} جنيه`;
+    }
+    
+    document.getElementById('search-monthly').addEventListener('input', renderMonthlyReport);
+
+    function renderStatistics() {
+        // Monthly Income Chart
+        const monthlyData = {};
+        allPayments.forEach(p => {
+            const date = new Date(p.date);
+            // Format as 'YYYY-MM' to sort correctly
+            const monthYearKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            monthlyData[monthYearKey] = (monthlyData[monthYearKey] || 0) + p.amount;
+        });
+        
+        const sortedMonths = Object.keys(monthlyData).sort();
+        const chartLabels = sortedMonths.map(key => 
+            new Date(key + '-02').toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' })
+        );
+        const chartData = sortedMonths.map(key => monthlyData[key]);
+
+        const ctxMonthly = document.getElementById('monthly-income-chart').getContext('2d');
+        if (monthlyIncomeChart) monthlyIncomeChart.destroy();
+        monthlyIncomeChart = new Chart(ctxMonthly, {
+            type: 'bar',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'إجمالي الدخل',
+                    data: chartData,
+                    backgroundColor: 'rgba(212, 175, 55, 0.6)',
+                    borderColor: 'rgba(212, 175, 55, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: 'var(--text-light)' },
+                        grid: { color: 'rgba(204, 214, 246, 0.1)' }
+                    },
+                    x: {
+                        ticks: { color: 'var(--text-light)' },
+                        grid: { color: 'rgba(204, 214, 246, 0.1)' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'var(--text-light)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Group Distribution Chart
+        const groupData = {};
+        allPayments.forEach(p => {
+            groupData[p.groupName] = (groupData[p.groupName] || 0) + p.amount;
+        });
+
+        const groupLabels = Object.keys(groupData);
+        const groupValues = Object.values(groupData);
+
+        const ctxGroup = document.getElementById('group-distribution-chart').getContext('2d');
+        if (groupDistributionChart) groupDistributionChart.destroy();
+        groupDistributionChart = new Chart(ctxGroup, {
+            type: 'doughnut',
+            data: {
+                labels: groupLabels,
+                datasets: [{
+                    label: 'توزيع الدخل',
+                    data: groupValues,
+                    backgroundColor: [
+                        'rgba(212, 175, 55, 0.7)', 'rgba(204, 214, 246, 0.7)', 'rgba(100, 255, 218, 0.7)',
+                        'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)'
+                    ],
+                    borderColor: 'var(--bg-light)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                 responsive: true,
+                 maintainAspectRatio: false,
+                 plugins: {
+                    legend: {
+                        position: 'top',
+                         labels: {
+                            color: 'var(--text-light)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderAdvancedSearch() {
+        const searchInput = document.getElementById('advanced-search-input').value.toLowerCase();
+        const resultsBody = document.getElementById('advanced-search-results');
+        const placeholder = document.getElementById('advanced-search-placeholder');
+
+        if (!searchInput) {
+            resultsBody.innerHTML = '';
+            placeholder.innerHTML = '<p>اكتب اسم طالب للبحث...</p>';
+            placeholder.classList.remove('hidden');
+            return;
+        }
+
+        const filteredPayments = allPayments.filter(p => p.studentName.toLowerCase().includes(searchInput));
+
+        if (filteredPayments.length === 0) {
+            resultsBody.innerHTML = '';
+            placeholder.innerHTML = '<p>لم يتم العثور على دفعات بهذا الاسم.</p>';
+            placeholder.classList.remove('hidden');
+            return;
+        }
+
+        placeholder.classList.add('hidden');
+        resultsBody.innerHTML = filteredPayments.map(p => `
+            <tr class="border-b border-gray-700 hover:bg-[var(--bg-dark)]">
+                <td class="p-3">${p.groupName}</td>
+                <td class="p-3 text-[var(--gold-accent)] font-semibold">${p.amount.toLocaleString()} جنيه</td>
+                <td class="p-3">${new Date(p.date).toLocaleDateString('ar-EG')}</td>
+            </tr>
+        `).join('');
+    }
+    
+    document.getElementById('advanced-search-input').addEventListener('input', renderAdvancedSearch);
+
+    // --- UTILITIES ---
+    
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.classList.remove('bg-green-500', 'bg-red-500');
+
+        if (type === 'success') {
+            notification.classList.add('bg-green-500');
+        } else {
+            notification.classList.add('bg-red-500');
+        }
+        
+        notification.classList.remove('translate-y-20', 'opacity-0');
+        notification.classList.add('translate-y-0', 'opacity-100');
+
+        setTimeout(() => {
+            notification.classList.remove('translate-y-0', 'opacity-100');
+            notification.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+    }
+    
+    // --- EXPORT FUNCTIONS ---
+    document.getElementById('export-excel-monthly').addEventListener('click', () => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        
+        const monthlyPayments = allPayments.filter(p => {
+            const paymentDate = new Date(p.date);
+            return paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear;
+        });
+
+        if (monthlyPayments.length === 0) {
+            showNotification('لا توجد بيانات لتصديرها هذا الشهر.', 'error');
+            return;
+        }
+
+        const dataToExport = monthlyPayments.map(p => ({
+            'اسم الطالب': p.studentName,
+            'المجموعة': p.groupName,
+            'المبلغ': p.amount,
+            'التاريخ': new Date(p.date).toLocaleDateString('ar-EG')
+        }));
+        
+        const total = monthlyPayments.reduce((sum, p) => sum + p.amount, 0);
+        dataToExport.push({}); // Empty row
+        dataToExport.push({'اسم الطالب': 'الإجمالي', 'المبلغ': total});
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'كشف الشهر');
+        XLSX.writeFile(workbook, `كشف_شهر_${now.toLocaleDateString('ar-EG', {month: 'long'})}.xlsx`);
+    });
+
+    document.getElementById('export-pdf-monthly').addEventListener('click', async () => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        
+        const monthlyPayments = allPayments.filter(p => {
+            const paymentDate = new Date(p.date);
+            return paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear;
+        });
+        
+        if (monthlyPayments.length === 0) {
+            showNotification('لا توجد بيانات لطباعة تقرير هذا الشهر.', 'error');
+            return;
+        }
+
+        const total = monthlyPayments.reduce((sum, p) => sum + p.amount, 0);
+        
+        // Populate the hidden PDF template
+        document.getElementById('pdf-month-name').textContent = now.toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' });
+        document.getElementById('pdf-month-total').textContent = `${total.toLocaleString()} جنيه`;
+        document.getElementById('pdf-report-date').textContent = now.toLocaleDateString('ar-EG');
+        
+        const pdfTableBody = document.getElementById('pdf-table-body');
+        pdfTableBody.innerHTML = monthlyPayments.map(p => `
+            <tr>
+                <td class="p-2 border border-gray-400">${p.studentName}</td>
+                <td class="p-2 border border-gray-400">${p.groupName}</td>
+                <td class="p-2 border border-gray-400">${p.amount.toLocaleString()}</td>
+                <td class="p-2 border border-gray-400">${new Date(p.date).toLocaleDateString('ar-EG')}</td>
+            </tr>
+        `).join('');
+
+        // Generate a temporary chart for the PDF
+        const pdfChartDataUrl = monthlyIncomeChart.toBase64Image();
+        document.getElementById('pdf-chart-image').src = pdfChartDataUrl;
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const reportElement = document.getElementById('pdf-report-template');
+        
+        const canvas = await html2canvas(reportElement, {
+            scale: 2, // Improve quality
+            useCORS: true,
+            allowTaint: true
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`تقرير_شهر_${now.toLocaleDateString('ar-EG', {month: 'long'})}.pdf`);
+    });
+
+</script>
+</body>
+</html>
+
